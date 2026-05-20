@@ -372,17 +372,15 @@
   <img id="stinger-logo" src="HLRP.jpg" alt="Headliner RP">
   <div id="stinger-divider"></div>
   <div id="stinger-text">
-    <span class="word">Are</span>
-    <span class="word">you</span>
-    <span class="word">going</span>
-    <span class="word">to</span>
-    <span class="word">be</span>
-    <span class="word">the</span>
-    <span class="word">next</span>
-    <span class="word gold">headline</span>
-    <span class="word">?</span>
+    <span class="word">Men</span>
+    <span class="word">Lie</span>
+    <span class="word">Women</span>
+    <span class="word">Lie</span>
+    <span class="word">Numbers</span>
+    <span class="word">Don't</span>
+    <span class="word gold">Lie</span>
   </div>
-  <div id="stinger-sub">MEN LIE, WOMEN LIE, NUMBER'S DON'T · Made by AbXero</div>
+  <div id="stinger-sub">Made by AbXero</div>
 </div>
 
 <div class="bg-grid"></div>
@@ -710,7 +708,7 @@ async function fetchTwitch() {
 // ─── POLL CYCLE ───────────────────────────────────────────────
 // 30 seconds — fast enough to catch someone going live quickly,
 // safe enough to never hit any rate limit.
-const POLL_MS = 30_000;
+const POLL_MS = 15_000;
 let pollTimer   = null;
 let pollActive  = false; // prevents overlapping fetches
 
@@ -761,7 +759,7 @@ function updateLastChecked() {
   const el = document.getElementById('last-checked');
   if (!el) return;
   const t = new Date();
-  el.textContent = `Updated: ${t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})} · next in 30s`;
+  el.textContent = `Updated: ${t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})} · next in 15s`;
 }
 
 // ─── STINGER ──────────────────────────────────────────────────
