@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Headliner RP</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #f5a623;
+    --red-live: #e8001d;
+    --blue-bolt: #00b4ff;
+    --dark: #080c14;
+    --panel: #0d1624;
+    --border: #1e2d45;
+    --text: #c8d8f0;
+    --muted: #4a6080;
+    --pd-accent: #1a6fff;
+    --bcso-accent: #d4a017;
+    --marshall-accent: #b8b8b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--dark);
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  #stinger {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+  }
+  #stinger-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  #stinger-bloom {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,166,35,0.18) 0%, rgba(255,80,0,0.08) 40%, transparent 70%);
+    opacity: 0;
+    transform: scale(0.2);
+    animation: bloomIn 1.4s cubic-bezier(0.23,1,0.32,1) 0.5s forwards;
+  }
+  @keyframes bloomIn { to { opacity: 1; transform: scale(1); } }
+  #stinger-lines { position: absolute; inset: 0; pointer-events: none; }
+  .stinger-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(245,166,35,0.6) 50%, transparent 100%);
+    transform: scaleX(0);
+    transform-origin: center;
+  }
+  .stinger-line:nth-child(1) { top: 30%; animation: lineWipe 0.6s cubic-bezier(0.23,1,0.32,1) 0.8s forwards; }
+  .stinger-line:nth-child(2) { top: 70%; animation: lineWipe 0.6s cubic-bezier(0.23,1,0.32,1) 0.9s forwards; }
+  .stinger-line:nth-child(3) { top: 50%; height: 2px; background: linear-gradient(90deg, transparent 0%, rgba(245,166,35,0.25) 50%, transparent 100%); animation: lineWipe 0.8s cubic-bezier(0.23,1,0.32,1) 0.7s forwards; }
+  @keyframes lineWipe { to { transform: scaleX(1); } }
+  #stinger-logo {
+    position: relative;
+    width: 220px;
+    opacity: 0;
+    transform: scale(0.6);
+    filter: drop-shadow(0 0 0px var(--gold));
+    animation: logoRise 1.0s cubic-bezier(0.23,1,0.32,1) 0.6s forwards;
+    z-index: 2;
+  }
+  @keyframes logoRise {
+    0%  { opacity: 0; transform: scale(0.6) translateY(30px); filter: drop-shadow(0 0 0px var(--gold)); }
+    60% { opacity: 1; transform: scale(1.06) translateY(-6px); filter: drop-shadow(0 0 50px var(--gold)) drop-shadow(0 0 100px #ff6600aa); }
+    100%{ opacity: 1; transform: scale(1) translateY(0); filter: drop-shadow(0 0 30px var(--gold)) drop-shadow(0 0 60px #ff660066); }
+  }
+  #stinger-divider {
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 28px 0 24px;
+    opacity: 0;
+    animation: dividerGrow 0.7s ease 1.8s forwards;
+    position: relative;
+    z-index: 2;
+  }
+  @keyframes dividerGrow { to { width: 320px; opacity: 1; } }
+  #stinger-text {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 40px;
+    line-height: 1.15;
+  }
+  #stinger-text .word {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.6rem, 4vw, 3rem);
+    letter-spacing: 0.08em;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(16px);
+    margin: 0 4px;
+  }
+  #stinger-text .word.gold { color: var(--gold); text-shadow: 0 0 24px rgba(245,166,35,0.7); }
+  #stinger-text .word:nth-child(1)  { animation: wordIn 0.5s ease 2.0s  forwards; }
+  #stinger-text .word:nth-child(2)  { animation: wordIn 0.5s ease 2.15s forwards; }
+  #stinger-text .word:nth-child(3)  { animation: wordIn 0.5s ease 2.3s  forwards; }
+  #stinger-text .word:nth-child(4)  { animation: wordIn 0.5s ease 2.45s forwards; }
+  #stinger-text .word:nth-child(5)  { animation: wordIn 0.5s ease 2.6s  forwards; }
+  #stinger-text .word:nth-child(6)  { animation: wordIn 0.5s ease 2.75s forwards; }
+  #stinger-text .word:nth-child(7)  { animation: wordIn 0.5s ease 2.9s  forwards; }
+  #stinger-text .word:nth-child(8)  { animation: wordIn 0.5s ease 3.05s forwards; }
+  #stinger-text .word:nth-child(9)  { animation: wordIn 0.5s ease 3.2s  forwards; }
+  @keyframes wordIn { to { opacity: 1; transform: translateY(0); } }
+  #stinger-sub {
+    position: relative;
+    z-index: 2;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 18px;
+    opacity: 0;
+    animation: wordIn 0.7s ease 3.6s forwards;
+  }
+  #stinger.outro { animation: stingerFadeOut 0.9s cubic-bezier(0.55,0,1,0.45) forwards; }
+  @keyframes stingerFadeOut {
+    0%   { opacity: 1; transform: scale(1);    pointer-events: all; }
+    40%  { opacity: 1; transform: scale(1.04); }
+    100% { opacity: 0; transform: scale(1.08); pointer-events: none; visibility: hidden; }
+  }
+  #stinger-scanline {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+    pointer-events: none;
+    z-index: 3;
+  }
+  .bg-grid {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,180,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,180,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .bg-vignette {
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+  }
+  .bg-fire-left, .bg-fire-right {
+    position: fixed; bottom: 0;
+    width: 300px; height: 400px;
+    pointer-events: none; opacity: 0.12;
+  }
+  .bg-fire-left  { left:  0; background: radial-gradient(ellipse at bottom left,  #ff6600, transparent); animation: flicker 3s ease-in-out infinite alternate; }
+  .bg-fire-right { right: 0; background: radial-gradient(ellipse at bottom right, #ff4400, transparent); animation: flicker 2.5s ease-in-out 0.5s infinite alternate; }
+  @keyframes flicker {
+    0%   { opacity: 0.08; transform: scaleY(1); }
+    100% { opacity: 0.18; transform: scaleY(1.05); }
+  }
+  header {
+    position: relative;
+    text-align: center;
+    padding: 60px 20px 40px;
+    opacity: 0;
+    animation: pageIn 0.8s ease 5.4s forwards;
+  }
+  header img.site-logo { width: 120px; margin-bottom: 16px; filter: drop-shadow(0 0 16px var(--gold)); }
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    letter-spacing: 0.1em;
+    line-height: 0.9;
+    background: linear-gradient(180deg, #fff 0%, var(--gold) 60%, #ff6600 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 4px 20px rgba(245,166,35,0.6));
+  }
+  header p.tagline {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    margin-top: 10px;
+    text-transform: uppercase;
+  }
+  .header-divider {
+    display: flex; align-items: center; gap: 16px;
+    max-width: 600px; margin: 24px auto 0;
+  }
+  .header-divider::before, .header-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .header-divider span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.2em; color: var(--gold);
+  }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  main {
+    max-width: 1600px; margin: 0 auto; padding: 0 24px 80px;
+    opacity: 0; animation: pageIn 0.8s ease 5.6s forwards;
+  }
+  .division { margin-bottom: 64px; }
+  .division-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .division-badge { width: 8px; height: 60px; border-radius: 4px; }
+  .pd       .division-badge { background: linear-gradient(180deg, var(--pd-accent),       #0033cc); box-shadow: 0 0 16px var(--pd-accent); }
+  .bcso     .division-badge { background: linear-gradient(180deg, var(--bcso-accent),     #8a6000); box-shadow: 0 0 16px var(--bcso-accent); }
+  .marshall .division-badge { background: linear-gradient(180deg, var(--marshall-accent), #606060); box-shadow: 0 0 16px var(--marshall-accent); }
+  .division-title-block h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem; letter-spacing: 0.08em; line-height: 1;
+  }
+  .pd       .division-title-block h2 { color: var(--pd-accent);       text-shadow: 0 0 20px var(--pd-accent); }
+  .bcso     .division-title-block h2 { color: var(--bcso-accent);     text-shadow: 0 0 20px var(--bcso-accent); }
+  .marshall .division-title-block h2 { color: var(--marshall-accent); text-shadow: 0 0 20px var(--marshall-accent); }
+  .division-title-block p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.25em; color: var(--muted); margin-top: 2px;
+  }
+  .stream-count { margin-left: auto; font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--muted); text-align: right; }
+  .stream-count .live-num {
+    font-size: 1.6rem; font-family: 'Bebas Neue', sans-serif;
+    color: var(--red-live); display: block; line-height: 1; text-shadow: 0 0 12px var(--red-live);
+  }
+  .streamer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    position: relative; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+  }
+  .card:hover { transform: translateY(-4px); border-color: var(--muted); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+  .card.live {
+    border-color: var(--red-live);
+    box-shadow: 0 0 0 1px var(--red-live), 0 0 30px rgba(232,0,29,0.3), inset 0 0 20px rgba(232,0,29,0.05);
+    animation: livePulse 2s ease-in-out infinite;
+  }
+  .card.going-live {
+    animation: goingLiveFlash 0.4s ease forwards, livePulse 2s ease-in-out 0.4s infinite !important;
+  }
+  @keyframes goingLiveFlash {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.03); box-shadow: 0 0 0 2px var(--red-live), 0 0 50px rgba(232,0,29,0.6); }
+    100% { transform: scale(1); }
+  }
+  @keyframes livePulse {
+    0%, 100% { box-shadow: 0 0 0 1px var(--red-live), 0 0 20px rgba(232,0,29,0.2), inset 0 0 20px rgba(232,0,29,0.04); }
+    50%       { box-shadow: 0 0 0 1px var(--red-live), 0 0 40px rgba(232,0,29,0.45), inset 0 0 30px rgba(232,0,29,0.1); }
+  }
+  .card-thumb { position: relative; width: 100%; padding-top: 56.25%; background: #0a0f1a; overflow: hidden; }
+  .card-thumb-placeholder {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0d1624 0%, #080c14 100%);
+  }
+  .card-thumb-placeholder svg { width: 48px; height: 48px; opacity: 0.15; }
+  .live-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--red-live); color: white;
+    font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; letter-spacing: 0.15em;
+    padding: 2px 10px 0; border-radius: 3px;
+    display: flex; align-items: center; gap: 6px;
+    box-shadow: 0 0 12px rgba(232,0,29,0.8);
+    animation: liveBadgePulse 1.2s ease-in-out infinite;
+  }
+  .live-dot { width: 7px; height: 7px; background: white; border-radius: 50%; animation: blink 1s ease-in-out infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+  @keyframes liveBadgePulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(232,0,29,0.7); }
+    50%       { box-shadow: 0 0 20px rgba(232,0,29,1); }
+  }
+  .offline-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,0.7); color: var(--muted);
+    font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 0.2em;
+    padding: 3px 8px; border-radius: 3px; border: 1px solid var(--border); text-transform: uppercase;
+  }
+  .viewer-count {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(0,0,0,0.8); color: white;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+    padding: 3px 8px; border-radius: 3px; display: flex; align-items: center; gap: 5px;
+  }
+  .card-body { padding: 16px; }
+  .card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%; background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem;
+    flex-shrink: 0; position: relative; overflow: visible;
+  }
+  .avatar img { width: 44px; height: 44px; object-fit: cover; border-radius: 50%; }
+  .card.live .avatar::after {
+    content: ''; position: absolute; inset: -2px; border-radius: 50%;
+    border: 2px solid var(--red-live); box-shadow: 0 0 8px var(--red-live);
+  }
+  .pd       .avatar { border: 2px solid var(--pd-accent); }
+  .bcso     .avatar { border: 2px solid var(--bcso-accent); }
+  .marshall .avatar { border: 2px solid var(--marshall-accent); }
+  .card-meta { flex: 1; min-width: 0; }
+  .card-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.06em; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-role { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .card-status-icon { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .card.live     .card-status-icon { background: var(--red-live); box-shadow: 0 0 8px var(--red-live); animation: blink 1s ease-in-out infinite; }
+  .card:not(.live) .card-status-icon { background: var(--muted); }
+  .card-stream-title { font-size: 0.85rem; color: var(--text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .card-platform { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  .twitch-icon { color: #9146ff; }
+  .kick-icon   { color: #53fc18; }
+  .card-watch-btn {
+    font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem; letter-spacing: 0.12em;
+    padding: 4px 14px 2px; border-radius: 4px; border: none; cursor: pointer;
+    transition: all 0.2s; text-decoration: none;
+  }
+  .card.live     .card-watch-btn { background: var(--red-live); color: white; box-shadow: 0 0 12px rgba(232,0,29,0.5); }
+  .card.live     .card-watch-btn:hover { background: #ff1a33; box-shadow: 0 0 20px rgba(232,0,29,0.8); transform: scale(1.05); }
+  .card:not(.live) .card-watch-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .card:not(.live) .card-watch-btn:hover { border-color: var(--muted); color: var(--text); }
+  .card.live::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--red-live), transparent);
+    animation: scanLine 2s linear infinite; z-index: 10;
+  }
+  @keyframes scanLine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  footer {
+    text-align: center; padding: 40px 20px; border-top: 1px solid var(--border);
+    opacity: 0; animation: pageIn 0.8s ease 5.8s forwards;
+  }
+  footer p { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 0.2em; color: var(--muted); }
+  footer .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--gold); letter-spacing: 0.15em; margin-bottom: 8px; }
+  .corner-decor { position: fixed; width: 80px; height: 80px; pointer-events: none; opacity: 0.3; }
+  .corner-decor.tl { top: 16px;    left: 16px;  border-top:    2px solid var(--gold); border-left:   2px solid var(--gold); }
+  .corner-decor.tr { top: 16px;    right: 16px; border-top:    2px solid var(--gold); border-right:  2px solid var(--gold); }
+  .corner-decor.bl { bottom: 16px; left: 16px;  border-bottom: 2px solid var(--gold); border-left:   2px solid var(--gold); }
+  .corner-decor.br { bottom: 16px; right: 16px; border-bottom: 2px solid var(--gold); border-right:  2px solid var(--gold); }
+</style>
+</head>
+<body>
+
+<div id="stinger">
+  <canvas id="stinger-canvas"></canvas>
+  <div id="stinger-scanline"></div>
+  <div id="stinger-bloom"></div>
+  <div id="stinger-lines">
+    <div class="stinger-line"></div>
+    <div class="stinger-line"></div>
+    <div class="stinger-line"></div>
+  </div>
+  <img id="stinger-logo" src="HLRP.jpg" alt="Headliner RP">
+  <div id="stinger-divider"></div>
+  <div id="stinger-text">
+    <span class="word">Are</span>
+    <span class="word">you</span>
+    <span class="word">going</span>
+    <span class="word">to</span>
+    <span class="word">be</span>
+    <span class="word">the</span>
+    <span class="word">next</span>
+    <span class="word gold">headline</span>
+    <span class="word">?</span>
+  </div>
+  <div id="stinger-sub">Headliner RP · Law Enforcement Division</div>
+</div>
+
+<div class="bg-grid"></div>
+<div class="bg-vignette"></div>
+<div class="bg-fire-left"></div>
+<div class="bg-fire-right"></div>
+<div class="corner-decor tl"></div>
+<div class="corner-decor tr"></div>
+<div class="corner-decor bl"></div>
+<div class="corner-decor br"></div>
+
+<header>
+  <img src="HLRP.jpg" class="site-logo" alt="Headliner RP Logo">
+  <h1>Headliner RP</h1>
+  <p class="tagline">Law Enforcement Streamer Hub</p>
+  <div class="header-divider"><span>★ LIVE NOW ★</span></div>
+</header>
+
+<main id="main-content">
+  <section class="division pd" id="section-pd">
+    <div class="division-header">
+      <div class="division-badge"></div>
+      <div class="division-title-block">
+        <h2>Police Department</h2>
+        <p>LOS SANTOS METROPOLITAN PD · LSPD</p>
+      </div>
+      <div class="stream-count"><span class="live-num" id="pd-live-count">0</span>LIVE NOW</div>
+    </div>
+    <div class="streamer-grid" id="pd-grid"></div>
+  </section>
+
+  <section class="division bcso" id="section-bcso">
+    <div class="division-header">
+      <div class="division-badge"></div>
+      <div class="division-title-block">
+        <h2>BCSO</h2>
+        <p>BLAINE COUNTY SHERIFF'S OFFICE</p>
+      </div>
+      <div class="stream-count"><span class="live-num" id="bcso-live-count">0</span>LIVE NOW</div>
+    </div>
+    <div class="streamer-grid" id="bcso-grid"></div>
+  </section>
+
+  <section class="division marshall" id="section-marshall">
+    <div class="division-header">
+      <div class="division-badge"></div>
+      <div class="division-title-block">
+        <h2>U.S. Marshalls</h2>
+        <p>UNITED STATES MARSHALS SERVICE · USMS</p>
+      </div>
+      <div class="stream-count"><span class="live-num" id="marshall-live-count">0</span>LIVE NOW</div>
+    </div>
+    <div class="streamer-grid" id="marshall-grid"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-logo">★ Headliner RP ★</div>
+  <p>FEAR THE GUILT · LAW ENFORCEMENT DIVISION · FIVEM ROLEPLAY</p>
+  <p id="last-checked" style="margin-top:8px;font-size:0.6rem;opacity:0.4;">Checking stream status…</p>
+</footer>
+
+<script>
+// ─── ROSTER ── Edit this to add/remove streamers ──────────────
+const ROSTER = [
+  // PD
+  { id: 'pd-1', name: 'Damian Rodriguez', role: 'Chief · LSPD',      division: 'pd',       platform: 'twitch', twitchLogin: 'tio_chubbs'   },
+  { id: 'pd-2', name: 'Micheal Scarn',    role: 'Commander · LSPD',  division: 'pd',       platform: 'twitch', twitchLogin: 'officerscarn' },
+  // BCSO
+  { id: 'bc-1', name: 'Jessie Martinez',  role: 'Sheriff · BCSO',    division: 'bcso',     platform: 'twitch', twitchLogin: 'kekosix'      },
+  { id: 'bc-2', name: 'Rue Bee',          role: 'Captain · BCSO',    division: 'bcso',     platform: 'twitch', twitchLogin: 'teeeheeex'    },
+  // MARSHALL
+  { id: 'ma-1', name: 'Apollo Storm',     role: 'Marshal',           division: 'marshall', platform: 'twitch', twitchLogin: 'justttkevin'  },
+];
+
+// ─── STATE ────────────────────────────────────────────────────
+const liveState = {};
+ROSTER.forEach(s => {
+  liveState[s.id] = { isLive: false, viewers: 0, title: '', thumbnailUrl: '' };
+});
+
+// ─── HELPERS ──────────────────────────────────────────────────
+const platformIcons = {
+  twitch: { icon: '◉', label: 'TWITCH', cls: 'twitch-icon' },
+  kick:   { icon: '⚡', label: 'KICK',   cls: 'kick-icon'   },
+};
+function getInitials(name) { return name.replace(/[^a-zA-Z]/g,'').slice(0,2).toUpperCase(); }
+function formatViewers(n) { return n >= 1000 ? (n/1000).toFixed(1)+'K' : String(n); }
+function channelUrl(s) {
+  if (s.platform === 'twitch') return `https://twitch.tv/${s.twitchLogin}`;
+  if (s.platform === 'kick')   return `https://kick.com/${s.kickLogin}`;
+  return '#';
+}
+
+// ─── BUILD CARD ───────────────────────────────────────────────
+function buildCard(streamer) {
+  const state = liveState[streamer.id];
+  const p     = platformIcons[streamer.platform] || platformIcons.twitch;
+  const url   = channelUrl(streamer);
+  const inits = getInitials(streamer.name);
+  const thumbStyle = state.thumbnailUrl
+    ? `background-image:url('${state.thumbnailUrl}');background-size:cover;background-position:center;`
+    : '';
+  return `
+  <div class="card ${state.isLive ? 'live' : ''} ${streamer.division}"
+       data-id="${streamer.id}" data-url="${url}"
+       onclick="window.open(this.dataset.url,'_blank','noopener')" style="cursor:pointer;">
+    <div class="card-thumb">
+      <div class="card-thumb-placeholder" style="${thumbStyle}">
+        ${!state.thumbnailUrl ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/></svg>` : ''}
+      </div>
+      ${state.isLive
+        ? `<div class="live-badge"><div class="live-dot"></div>LIVE</div>`
+        : `<div class="offline-badge">OFFLINE</div>`}
+      ${state.isLive ? `<div class="viewer-count">👁 ${formatViewers(state.viewers)}</div>` : ''}
+    </div>
+    <div class="card-body">
+      <div class="card-top">
+        <div class="avatar">${inits}</div>
+        <div class="card-meta">
+          <div class="card-name">${streamer.name}</div>
+          <div class="card-role">${streamer.role}</div>
+        </div>
+        <div class="card-status-icon"></div>
+      </div>
+      <div class="card-stream-title">${state.isLive ? (state.title || 'Live now') : 'Currently offline'}</div>
+      <div class="card-footer">
+        <div class="card-platform">
+          <span class="${p.cls}">${p.icon}</span> ${p.label}
+        </div>
+        <a class="card-watch-btn" href="${url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+          ${state.isLive ? 'WATCH' : 'PROFILE'}
+        </a>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── INITIAL RENDER ───────────────────────────────────────────
+function initialRender() {
+  const sections = { pd: [], bcso: [], marshall: [] };
+  ROSTER.forEach(s => sections[s.division]?.push(s));
+  ['pd','bcso','marshall'].forEach(div => {
+    const grid = document.getElementById(`${div}-grid`);
+    if (grid) grid.innerHTML = sections[div].map(buildCard).join('');
+  });
+  updateCounts();
+}
+
+// ─── PATCH CARD (surgical — only changed nodes) ───────────────
+function patchCard(streamer, prev) {
+  const cur = liveState[streamer.id];
+  const el  = document.querySelector(`.card[data-id="${streamer.id}"]`);
+  if (!el) return;
+
+  const wasLive = prev.isLive;
+  const isLive  = cur.isLive;
+
+  if (wasLive !== isLive) {
+    el.classList.toggle('live', isLive);
+
+    // Swap badge
+    const thumb    = el.querySelector('.card-thumb');
+    const oldBadge = thumb.querySelector('.live-badge, .offline-badge');
+    if (oldBadge) oldBadge.remove();
+    const badge = document.createElement('div');
+    if (isLive) {
+      badge.className = 'live-badge';
+      badge.innerHTML = '<div class="live-dot"></div>LIVE';
+    } else {
+      badge.className = 'offline-badge';
+      badge.textContent = 'OFFLINE';
+    }
+    const ph  = thumb.querySelector('.card-thumb-placeholder');
+    const vc2 = thumb.querySelector('.viewer-count');
+    if (ph && ph.nextSibling) thumb.insertBefore(badge, ph.nextSibling);
+    else thumb.appendChild(badge);
+
+    // Button text
+    const btn = el.querySelector('.card-watch-btn');
+    if (btn) btn.textContent = isLive ? 'WATCH' : 'PROFILE';
+
+    // Stream title
+    const titleEl = el.querySelector('.card-stream-title');
+    if (titleEl) titleEl.textContent = isLive ? (cur.title || 'Live now') : 'Currently offline';
+
+    // Going-live flash
+    if (isLive) {
+      el.classList.add('going-live');
+      setTimeout(() => el.classList.remove('going-live'), 400);
+    }
+
+    // Remove viewer count when going offline
+    if (!isLive) el.querySelector('.viewer-count')?.remove();
+  }
+
+  // Viewer count
+  if (isLive) {
+    const vcText = `👁 ${formatViewers(cur.viewers)}`;
+    let vcEl = el.querySelector('.viewer-count');
+    if (!vcEl) {
+      vcEl = document.createElement('div');
+      vcEl.className = 'viewer-count';
+      el.querySelector('.card-thumb').appendChild(vcEl);
+    }
+    if (vcEl.textContent !== vcText) vcEl.textContent = vcText;
+  }
+
+  // Title update while staying live
+  if (isLive && wasLive && cur.title !== prev.title) {
+    const titleEl = el.querySelector('.card-stream-title');
+    if (titleEl) titleEl.textContent = cur.title || 'Live now';
+  }
+
+  // Thumbnail
+  if (cur.thumbnailUrl && cur.thumbnailUrl !== prev.thumbnailUrl) {
+    const ph = el.querySelector('.card-thumb-placeholder');
+    if (ph) {
+      ph.style.backgroundImage    = `url('${cur.thumbnailUrl}')`;
+      ph.style.backgroundSize     = 'cover';
+      ph.style.backgroundPosition = 'center';
+      ph.innerHTML = '';
+    }
+  }
+}
+
+// ─── UPDATE COUNTS + SORT ─────────────────────────────────────
+function updateCounts() {
+  ['pd','bcso','marshall'].forEach(div => {
+    const count = ROSTER.filter(s => s.division === div && liveState[s.id].isLive).length;
+    const el = document.getElementById(`${div}-live-count`);
+    if (el) el.textContent = count;
+
+    // Float live cards to top — batch DOM write with DocumentFragment
+    const grid = document.getElementById(`${div}-grid`);
+    if (!grid) return;
+    const cards   = [...grid.querySelectorAll('.card')];
+    const live    = cards.filter(c =>  c.classList.contains('live'));
+    const offline = cards.filter(c => !c.classList.contains('live'));
+    const sorted  = [...live, ...offline];
+    if (sorted.some((c, i) => c !== cards[i])) {
+      const frag = document.createDocumentFragment();
+      sorted.forEach(c => frag.appendChild(c));
+      grid.appendChild(frag);
+    }
+  });
+}
+
+// ─── TWITCH GQL FETCH ────────────────────────────────────────
+// Uses Twitch's own public GraphQL API — no token, no server needed.
+// Batches ALL streamers in one request. Safe to call every 30s.
+const GQL_URL = 'https://gql.twitch.tv/gql';
+const GQL_CLIENT_ID = 'kimne78kx3ncx6brgo4mv6wki5h1ko'; // Twitch's own site client ID
+
+async function fetchTwitch() {
+  const streamers = ROSTER.filter(s => s.platform === 'twitch');
+  if (!streamers.length) return;
+
+  const logins = streamers.map(s => s.twitchLogin.toLowerCase());
+
+  // One GraphQL query — all streamers batched together
+  const query = {
+    query: `query($logins:[String!]!) {
+      users(logins: $logins) {
+        login
+        stream {
+          viewersCount
+          title
+          previewImageURL(width: 440, height: 248)
+        }
+      }
+    }`,
+    variables: { logins }
+  };
+
+  let result;
+  try {
+    const res = await fetch(GQL_URL, {
+      method: 'POST',
+      headers: {
+        'Client-ID': GQL_CLIENT_ID,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(query),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) { console.warn('[HLRP] GQL error:', res.status); return; }
+    result = await res.json();
+  } catch (err) {
+    console.warn('[HLRP] Twitch GQL fetch failed:', err.message);
+    return;
+  }
+
+  // Build lookup: login → user node
+  const userMap = {};
+  (result?.data?.users ?? []).forEach(u => {
+    if (u) userMap[u.login.toLowerCase()] = u;
+  });
+
+  streamers.forEach(streamer => {
+    const prev  = { ...liveState[streamer.id] };
+    const user  = userMap[streamer.twitchLogin.toLowerCase()];
+    const stream = user?.stream ?? null; // null = offline
+
+    liveState[streamer.id] = {
+      isLive:       !!stream,
+      viewers:      stream?.viewersCount      ?? 0,
+      title:        stream?.title             ?? '',
+      thumbnailUrl: stream?.previewImageURL   ?? '',
+    };
+
+    const cur = liveState[streamer.id];
+    const changed =
+      cur.isLive       !== prev.isLive  ||
+      cur.viewers      !== prev.viewers ||
+      cur.title        !== prev.title   ||
+      cur.thumbnailUrl !== prev.thumbnailUrl;
+
+    if (changed) patchCard(streamer, prev);
+  });
+}
+
+// ─── POLL CYCLE ───────────────────────────────────────────────
+// 30 seconds — fast enough to catch someone going live quickly,
+// safe enough to never hit any rate limit.
+const POLL_MS = 30_000;
+let pollTimer   = null;
+let pollActive  = false; // prevents overlapping fetches
+
+async function poll() {
+  if (pollActive) return;
+  pollActive = true;
+  setChecking(true);
+  try {
+    await fetchTwitch();
+    updateCounts();
+    updateLastChecked();
+  } catch(e) {
+    console.error('[HLRP] poll error:', e);
+  } finally {
+    pollActive = false;
+    setChecking(false);
+  }
+}
+
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  poll(); // fire immediately
+  pollTimer = setInterval(poll, POLL_MS);
+}
+
+function stopPolling() {
+  clearInterval(pollTimer);
+  pollTimer = null;
+}
+
+// Pause when tab hidden, fire immediately when tab comes back
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopPolling();
+  } else {
+    startPolling(); // includes an immediate poll
+  }
+});
+
+// ─── STATUS INDICATOR ─────────────────────────────────────────
+function setChecking(on) {
+  const el = document.getElementById('last-checked');
+  if (!el) return;
+  if (on) el.textContent = 'Checking…';
+}
+
+function updateLastChecked() {
+  const el = document.getElementById('last-checked');
+  if (!el) return;
+  const t = new Date();
+  el.textContent = `Updated: ${t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})} · next in 30s`;
+}
+
+// ─── STINGER ──────────────────────────────────────────────────
+setTimeout(() => {
+  document.getElementById('stinger').classList.add('outro');
+  setTimeout(() => {
+    const s = document.getElementById('stinger');
+    if (s) s.style.display = 'none';
+  }, 950);
+}, 4600);
+
+(function() {
+  const canvas = document.getElementById('stinger-canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  let particles = [], started = false;
+  function spawnParticles() {
+    for (let i = 0; i < 80; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 4;
+      const colors = ['#f5a623','#ff8800','#ffffff','#ffdd88','#ff4400'];
+      particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+        life: 1, decay: 0.008 + Math.random()*0.012,
+        size: 1.5 + Math.random()*3,
+        color: colors[Math.floor(Math.random()*colors.length)],
+      });
+    }
+    started = true;
+  }
+  setTimeout(spawnParticles, 1600);
+  function loop() {
+    if (!started) { requestAnimationFrame(loop); return; }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.04; p.life -= p.decay;
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle   = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    if (particles.length > 0) requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// ─── BOOT ─────────────────────────────────────────────────────
+initialRender();
+startPolling();
+</script>
+</body>
+</html>
